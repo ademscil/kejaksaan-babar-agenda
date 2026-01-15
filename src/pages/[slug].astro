@@ -1,0 +1,54 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const pages = await getCollection('pages');
+  return pages.map(page => ({
+    params: { slug: page.slug },
+    props: { page },
+  }));
+}
+
+const { page } = Astro.props;
+const { Content } = await page.render();
+---
+
+<BaseLayout title={`${page.data.title} - Aktivitas Kegiatan`}>
+  <article class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-8 leading-tight">
+      {page.data.title}
+    </h1>
+
+    <div class="prose prose-lg max-w-none">
+      <Content />
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .prose {
+    @apply text-gray-700 leading-relaxed;
+  }
+  .prose h2 {
+    @apply text-2xl font-bold text-gray-900 mt-8 mb-4;
+  }
+  .prose h3 {
+    @apply text-xl font-bold text-gray-900 mt-6 mb-3;
+  }
+  .prose p {
+    @apply mb-4;
+  }
+  .prose ul, .prose ol {
+    @apply mb-4 ml-6;
+  }
+  .prose li {
+    @apply mb-2;
+  }
+  .prose a {
+    @apply text-primary-600 hover:text-primary-700 underline;
+  }
+  .prose img {
+    @apply rounded-2xl my-6;
+  }
+</style>

@@ -1,0 +1,85 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const videos = await getCollection('videos', ({ data }) => data.status === 'Publish');
+  return videos.map(video => ({
+    params: { slug: video.slug },
+    props: { video },
+  }));
+}
+
+const { video } = Astro.props;
+const { Content } = await video.render();
+
+const formatDate = (date: Date) => {
+  return new Intl.DateTimeFormat('id-ID', { 
+    day: 'numeric', 
+    month: 'long', 
+    year: 'numeric' 
+  }).format(date);
+};
+
+const getYouTubeId = (url: string) => {
+  const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/);
+  return match ? match[1] : '';
+};
+
+const videoId = getYouTubeId(video.data.youtubeUrl);
+---
+
+<BaseLayout 
+  title={`${video.data.title} - Video`}
+  description={video.data.description || video.data.title}
+>
+  <article class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="mb-6">
+      <a href="/video" class="text-primary-600 hover:text-primary-700 font-medium">
+        ← Kembali ke Video
+      </a>
+    </div>
+
+    <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4 leading-tight">
+      {video.data.title}
+    </h1>
+
+    <div class="flex items-center gap-4 text-gray-600 mb-8">
+      <time>{formatDate(video.data.date)}</time>
+    </div>
+
+    <div class="aspect-video rounded-3xl overflow-hidden bg-gray-900 mb-8">
+      <iframe
+        src={`https://www.youtube.com/embed/${videoId}`}
+        title={video.data.title}
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen
+        class="w-full h-full"
+      ></iframe>
+    </div>
+
+    {video.data.description && (
+      <div class="prose prose-lg max-w-none mb-8">
+        <p class="text-lg text-gray-700">{video.data.description}</p>
+      </div>
+    )}
+
+    {Content && (
+      <div class="prose prose-lg max-w-none">
+        <Content />
+      </div>
+    )}
+  </article>
+</BaseLayout>
+
+<style>
+  .prose {
+    @apply text-gray-700 leading-relaxed;
+  }
+  .prose h2 {
+    @apply text-2xl font-bold text-gray-900 mt-8 mb-4;
+  }
+  .prose p {
+    @apply mb-4;
+  }
+</style>

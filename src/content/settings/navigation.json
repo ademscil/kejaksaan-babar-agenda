@@ -1,0 +1,104 @@
+{
+  "headerMenu": [
+    {
+      "label": "Beranda",
+      "url": "/",
+      "type": "internal",
+      "order": 1,
+      "enabled": true
+    },
+    {
+      "label": "Kegiatan",
+      "url": "/kegiatan",
+      "type": "internal",
+      "order": 2,
+      "enabled": true
+    },
+    {
+      "label": "Agenda",
+      "url": "/agenda",
+      "type": "internal",
+      "order": 3,
+      "enabled": true
+    },
+    {
+      "label": "Galeri",
+      "url": "/galeri",
+      "type": "internal",
+      "order": 4,
+      "enabled": true
+    },
+    {
+      "label": "Video",
+      "url": "/video",
+      "type": "internal",
+      "order": 5,
+      "enabled": true
+    },
+    {
+      "label": "Dokumen",
+      "url": "/dokumen",
+      "type": "internal",
+      "order": 6,
+      "enabled": true
+    },
+    {
+      "label": "Profil",
+      "url": "/profil",
+      "type": "internal",
+      "order": 7,
+      "enabled": true
+    },
+    {
+      "label": "Kontak",
+      "url": "/kontak",
+      "type": "internal",
+      "order": 8,
+      "enabled": true
+    }
+  ],
+  "footerMenu": [
+    {
+      "label": "Profil",
+      "url": "/profil",
+      "type": "internal",
+      "order": 1,
+      "enabled": true
+    },
+    {
+      "label": "Struktur",
+      "url": "/struktur",
+      "type": "internal",
+      "order": 2,
+      "enabled": true
+    },
+    {
+      "label": "Layanan",
+      "url": "/layanan",
+      "type": "internal",
+      "order": 3,
+      "enabled": true
+    },
+    {
+      "label": "Kontak",
+      "url": "/kontak",
+      "type": "internal",
+      "order": 4,
+      "enabled": true
+    },
+    {
+      "label": "Kegiatan",
+      "url": "/kegiatan",
+      "type": "internal",
+      "order": 5,
+      "enabled": true
+    },
+    {
+      "label": "Galeri Foto",
+      "url": "/galeri",
+      "type": "internal",
+      "order": 6,
+      "enabled": true
+    }
+  ]
+}

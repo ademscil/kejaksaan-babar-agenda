@@ -1,0 +1,28 @@
+{
+  "heroMode": "latestFeatured",
+  "heroManualSlug": "",
+  "sections": [
+    {
+      "key": "latestActivities",
+      "title": "Kegiatan Terbaru",
+      "enabled": true,
+      "limit": 6,
+      "order": 1
+    },
+    {
+      "key": "upcomingEvents",
+      "title": "Agenda Terdekat",
+      "enabled": true,
+      "limit": 4,
+      "order": 2
+    },
+    {
+      "key": "photoAlbums",
+      "title": "Album Foto",
+      "enabled": true,
+      "limit": 4,
+      "order": 3
+    }
+  ],
+  "featuredSlugs": []
+}

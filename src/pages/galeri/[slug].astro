@@ -1,0 +1,156 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const galleries = await getCollection('galleries', ({ data }) => data.status === 'Publish');
+  return galleries.map(gallery => ({
+    params: { slug: gallery.slug },
+    props: { gallery },
+  }));
+}
+
+const { gallery } = Astro.props;
+const { Content } = await gallery.render();
+
+const formatDate = (date: Date) => {
+  return new Intl.DateTimeFormat('id-ID', { 
+    day: 'numeric', 
+    month: 'long', 
+    year: 'numeric' 
+  }).format(date);
+};
+---
+
+<BaseLayout 
+  title={`${gallery.data.title} - Galeri Foto`}
+  description={gallery.data.description || gallery.data.title}
+  image={gallery.data.coverImage}
+>
+  <article class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="mb-6">
+      <a href="/galeri" class="text-primary-600 hover:text-primary-700 font-medium">
+        ← Kembali ke Galeri
+      </a>
+    </div>
+
+    <div class="max-w-4xl mb-12">
+      <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4 leading-tight">
+        {gallery.data.title}
+      </h1>
+      <div class="flex items-center gap-4 text-gray-600 mb-6">
+        <time>{formatDate(gallery.data.date)}</time>
+        <span>•</span>
+        <span>{gallery.data.images.length} foto</span>
+      </div>
+      {gallery.data.description && (
+        <p class="text-lg text-gray-600">{gallery.data.description}</p>
+      )}
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="gallery">
+      {gallery.data.images.map((img: string, index: number) => (
+        <button 
+          class="gallery-item aspect-square rounded-2xl overflow-hidden bg-gray-100 hover:opacity-90 transition-all hover:scale-105"
+          data-index={index}
+        >
+          <img 
+            src={img} 
+            alt={`${gallery.data.title} - Foto ${index + 1}`}
+            class="w-full h-full object-cover"
+            loading="lazy"
+          />
+        </button>
+      ))}
+    </div>
+
+    {Content && (
+      <div class="max-w-4xl mt-12 prose prose-lg">
+        <Content />
+      </div>
+    )}
+  </article>
+
+  <div id="lightbox" class="hidden fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4">
+    <button id="close-lightbox" class="absolute top-4 right-4 text-white hover:text-gray-300 z-10">
+      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+    </button>
+    <button id="prev-image" class="absolute left-4 text-white hover:text-gray-300 z-10">
+      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+    </button>
+    <button id="next-image" class="absolute right-4 text-white hover:text-gray-300 z-10">
+      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+      </svg>
+    </button>
+    <div class="text-center">
+      <img id="lightbox-image" src="" alt="" class="max-w-full max-h-[80vh] object-contain mb-4" />
+      <div id="image-counter" class="text-white text-sm"></div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script is:inline define:vars={{ images: gallery.data.images }}>
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImage = document.getElementById('lightbox-image');
+  const imageCounter = document.getElementById('image-counter');
+  const closeBtn = document.getElementById('close-lightbox');
+  const prevBtn = document.getElementById('prev-image');
+  const nextBtn = document.getElementById('next-image');
+  const galleryItems = document.querySelectorAll('.gallery-item');
+
+  let currentIndex = 0;
+
+  function showImage(index) {
+    currentIndex = index;
+    if (lightboxImage) {
+      lightboxImage.src = images[index];
+    }
+    if (imageCounter) {
+      imageCounter.textContent = `${index + 1} / ${images.length}`;
+    }
+    if (lightbox) {
+      lightbox.classList.remove('hidden');
+    }
+  }
+
+  galleryItems.forEach((item, index) => {
+    item.addEventListener('click', () => showImage(index));
+  });
+
+  closeBtn?.addEventListener('click', () => {
+    lightbox?.classList.add('hidden');
+  });
+
+  prevBtn?.addEventListener('click', () => {
+    currentIndex = (currentIndex - 1 + images.length) % images.length;
+    showImage(currentIndex);
+  });
+
+  nextBtn?.addEventListener('click', () => {
+    currentIndex = (currentIndex + 1) % images.length;
+    showImage(currentIndex);
+  });
+
+  lightbox?.addEventListener('click', (e) => {
+    if (e.target === lightbox) {
+      lightbox.classList.add('hidden');
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (!lightbox?.classList.contains('hidden')) {
+      if (e.key === 'Escape') {
+        lightbox.classList.add('hidden');
+      } else if (e.key === 'ArrowLeft') {
+        prevBtn?.click();
+      } else if (e.key === 'ArrowRight') {
+        nextBtn?.click();
+      }
+    }
+  });
+</script>

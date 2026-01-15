@@ -1,0 +1,24 @@
+{
+  "siteName": "Aktivitas Kegiatan Kejaksaan",
+  "tagline": "Transparansi dan Akuntabilitas dalam Setiap Kegiatan",
+  "logo": "",
+  "address": "Jl. Contoh No. 123, Kota, Provinsi 12345",
+  "phone": "(021) 1234-5678",
+  "email": "info@kejaksaan-activity.com",
+  "socialLinks": {
+    "instagram": "https://instagram.com/kejaksaan",
+    "youtube": "https://youtube.com/@kejaksaan",
+    "tiktok": "https://tiktok.com/@kejaksaan",
+    "facebook": ""
+  },
+  "quickLinks": [
+    {
+      "label": "Pengaduan Online",
+      "url": "/kontak"
+    },
+    {
+      "label": "Informasi Perkara",
+      "url": "/layanan"
+    }
+  ]
+}

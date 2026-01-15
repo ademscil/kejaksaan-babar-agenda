@@ -1,0 +1,164 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ActivityCard from '../../components/ActivityCard.astro';
+import SearchBar from '../../components/SearchBar.astro';
+
+const allActivities = await getCollection('activities', ({ data }) => data.status === 'Publish');
+const sortedActivities = allActivities.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+const categories = ['Semua', 'Pengajian', 'Penyuluhan Hukum', 'Kunjungan Kerja', 'Rapat Koordinasi', 'Upacara', 'Bakti Sosial', 'Lainnya'];
+
+const allTags = [...new Set(sortedActivities.flatMap(a => a.data.tags || []))];
+---
+
+<BaseLayout title="Kegiatan - Aktivitas Kegiatan">
+  <div class="bg-gradient-to-b from-gray-50 to-white py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 class="text-4xl font-bold text-gray-900 mb-4">Kegiatan</h1>
+      <p class="text-xl text-gray-600 mb-8">Dokumentasi aktivitas dan kegiatan kami</p>
+
+      <div class="bg-white p-6 rounded-2xl shadow-sm mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="md:col-span-2">
+            <SearchBar placeholder="Cari kegiatan..." />
+          </div>
+          <div>
+            <select 
+              id="category-filter"
+              class="w-full px-5 py-3 rounded-2xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition-all"
+            >
+              {categories.map(cat => (
+                <option value={cat}>{cat}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {allTags.length > 0 && (
+          <div class="mt-4 flex flex-wrap gap-2">
+            <span class="text-sm text-gray-600 font-medium">Tag:</span>
+            {allTags.slice(0, 10).map(tag => (
+              <button 
+                class="tag-chip px-3 py-1 bg-gray-100 hover:bg-primary-50 hover:text-primary-600 text-gray-700 rounded-lg text-sm transition-colors"
+                data-tag={tag}
+              >
+                #{tag}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div id="activities-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {sortedActivities.map(activity => (
+          <ActivityCard
+            title={activity.data.title}
+            date={activity.data.date}
+            category={activity.data.category}
+            excerpt={activity.data.excerpt}
+            coverImage={activity.data.coverImage}
+            slug={activity.slug}
+            tags={activity.data.tags}
+          />
+        ))}
+      </div>
+
+      <div id="no-results" class="hidden text-center py-12">
+        <p class="text-gray-500 text-lg">Tidak ada kegiatan yang ditemukan</p>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script is:inline>
+  import Fuse from 'fuse.js';
+
+  const activitiesData = JSON.parse(document.getElementById('activities-data')?.textContent || '[]');
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const grid = document.getElementById('activities-grid');
+    const noResults = document.getElementById('no-results');
+    const searchInput = document.getElementById('search-input');
+    const categoryFilter = document.getElementById('category-filter');
+    const tagChips = document.querySelectorAll('.tag-chip');
+
+    const activities = activitiesData.map((a, index) => ({
+      ...a,
+      element: grid?.children[index]
+    }));
+
+    const fuse = new Fuse(activities, {
+      keys: ['title', 'excerpt', 'tags'],
+      threshold: 0.3,
+    });
+
+    let currentSearch = '';
+    let currentCategory = 'Semua';
+    let currentTag = '';
+
+    function filterActivities() {
+      let filtered = activities;
+
+      if (currentSearch) {
+        const results = fuse.search(currentSearch);
+        filtered = results.map(r => r.item);
+      }
+
+      if (currentCategory !== 'Semua') {
+        filtered = filtered.filter(a => a.category === currentCategory);
+      }
+
+      if (currentTag) {
+        filtered = filtered.filter(a => a.tags.includes(currentTag));
+      }
+
+      activities.forEach(a => {
+        if (a.element) {
+          a.element.style.display = filtered.includes(a) ? 'block' : 'none';
+        }
+      });
+
+      if (noResults) {
+        noResults.style.display = filtered.length === 0 ? 'block' : 'none';
+      }
+      if (grid) {
+        grid.style.display = filtered.length === 0 ? 'none' : 'grid';
+      }
+    }
+
+    searchInput?.addEventListener('input', (e) => {
+      currentSearch = e.target.value;
+      filterActivities();
+    });
+
+    categoryFilter?.addEventListener('change', (e) => {
+      currentCategory = e.target.value;
+      filterActivities();
+    });
+
+    tagChips.forEach(chip => {
+      chip.addEventListener('click', (e) => {
+        const tag = e.target.dataset.tag || '';
+        currentTag = currentTag === tag ? '' : tag;
+        
+        tagChips.forEach(c => c.classList.remove('bg-primary-500', 'text-white'));
+        if (currentTag) {
+          e.target.classList.add('bg-primary-500', 'text-white');
+        }
+        
+        filterActivities();
+      });
+    });
+  });
+</script>
+
+<script type="application/json" id="activities-data">
+  {JSON.stringify(sortedActivities.map(a => ({
+    title: a.data.title,
+    category: a.data.category,
+    excerpt: a.data.excerpt,
+    tags: a.data.tags || [],
+    slug: a.slug
+  })))}
+</script>

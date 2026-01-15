@@ -1,0 +1,186 @@
+backend:
+  name: test-repo
+
+media_folder: "public/uploads"
+public_folder: "/uploads"
+
+locale: "id"
+
+collections:
+  - name: "activities"
+    label: "Kegiatan"
+    label_singular: "Kegiatan"
+    folder: "src/content/activities"
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    preview_path: "kegiatan/{{slug}}"
+    fields:
+      - {label: "Status", name: "status", widget: "select", options: ["Draft", "Publish"], default: "Draft", hint: "Draft tidak akan tampil di website"}
+      - {label: "Judul", name: "title", widget: "string", required: true}
+      - {label: "Tanggal", name: "date", widget: "datetime", required: true}
+      - {label: "Kategori", name: "category", widget: "select", options: ["Pengajian", "Penyuluhan Hukum", "Kunjungan Kerja", "Rapat Koordinasi", "Upacara", "Bakti Sosial", "Lainnya"], required: true}
+      - {label: "Tag", name: "tags", widget: "list", required: false, hint: "Tekan Enter untuk menambah tag"}
+      - {label: "Ringkasan", name: "excerpt", widget: "text", required: true, hint: "Deskripsi singkat untuk preview"}
+      - {label: "Unggulan", name: "featured", widget: "boolean", default: false, hint: "Tampilkan di hero homepage"}
+      - {label: "Lokasi", name: "location", widget: "string", required: false}
+      - {label: "Foto Sampul", name: "coverImage", widget: "image", required: true}
+      - {label: "Galeri Foto", name: "galleryImages", widget: "list", field: {label: "Foto", name: "image", widget: "image"}, required: false}
+      - {label: "Isi Kegiatan", name: "body", widget: "markdown", required: true}
+
+  - name: "events"
+    label: "Agenda"
+    label_singular: "Agenda"
+    folder: "src/content/events"
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    preview_path: "agenda/{{slug}}"
+    fields:
+      - {label: "Status", name: "status", widget: "select", options: ["Draft", "Publish"], default: "Draft"}
+      - {label: "Judul", name: "title", widget: "string", required: true}
+      - {label: "Tanggal Mulai", name: "startDate", widget: "datetime", required: true}
+      - {label: "Tanggal Selesai", name: "endDate", widget: "datetime", required: false}
+      - {label: "Lokasi", name: "location", widget: "string", required: true}
+      - {label: "Status Agenda", name: "eventStatus", widget: "select", options: ["Akan Datang", "Selesai"], required: true}
+      - {label: "Ringkasan", name: "excerpt", widget: "text", required: true}
+      - {label: "Detail", name: "body", widget: "markdown", required: true}
+
+  - name: "galleries"
+    label: "Album Foto"
+    label_singular: "Album"
+    folder: "src/content/galleries"
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    preview_path: "galeri/{{slug}}"
+    fields:
+      - {label: "Status", name: "status", widget: "select", options: ["Draft", "Publish"], default: "Draft"}
+      - {label: "Judul Album", name: "title", widget: "string", required: true}
+      - {label: "Tanggal", name: "date", widget: "datetime", required: true}
+      - {label: "Foto Sampul", name: "coverImage", widget: "image", required: true}
+      - {label: "Foto-foto", name: "images", widget: "list", field: {label: "Foto", name: "image", widget: "image"}, required: true, hint: "Upload minimal 1 foto"}
+      - {label: "Deskripsi", name: "description", widget: "text", required: false}
+      - {label: "Detail", name: "body", widget: "markdown", required: false}
+
+  - name: "videos"
+    label: "Video"
+    label_singular: "Video"
+    folder: "src/content/videos"
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    preview_path: "video/{{slug}}"
+    fields:
+      - {label: "Status", name: "status", widget: "select", options: ["Draft", "Publish"], default: "Draft"}
+      - {label: "Judul", name: "title", widget: "string", required: true}
+      - {label: "Tanggal", name: "date", widget: "datetime", required: true}
+      - {label: "URL YouTube", name: "youtubeUrl", widget: "string", required: true, hint: "Contoh: https://www.youtube.com/watch?v=xxxxx"}
+      - {label: "Thumbnail", name: "coverImage", widget: "image", required: false}
+      - {label: "Deskripsi", name: "description", widget: "text", required: false}
+      - {label: "Detail", name: "body", widget: "markdown", required: false}
+
+  - name: "documents"
+    label: "Dokumen"
+    label_singular: "Dokumen"
+    folder: "src/content/documents"
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    fields:
+      - {label: "Status", name: "status", widget: "select", options: ["Draft", "Publish"], default: "Draft"}
+      - {label: "Judul", name: "title", widget: "string", required: true}
+      - {label: "Tanggal", name: "date", widget: "datetime", required: true}
+      - {label: "Kategori", name: "category", widget: "select", options: ["Peraturan", "Surat", "Materi", "Lainnya"], required: true}
+      - {label: "File", name: "file", widget: "file", required: true}
+      - {label: "Deskripsi", name: "description", widget: "text", required: false}
+      - {label: "Detail", name: "body", widget: "markdown", required: false}
+
+  - name: "pages"
+    label: "Halaman"
+    label_singular: "Halaman"
+    folder: "src/content/pages"
+    create: false
+    slug: "{{slug}}"
+    fields:
+      - {label: "Judul", name: "title", widget: "string", required: true}
+      - {label: "Slug", name: "slug", widget: "string", required: true}
+      - {label: "Konten", name: "body", widget: "markdown", required: true}
+
+  - name: "settings"
+    label: "Pengaturan"
+    files:
+      - name: "site"
+        label: "Info Situs"
+        file: "src/content/settings/site.json"
+        fields:
+          - {label: "Nama Situs", name: "siteName", widget: "string", required: true}
+          - {label: "Tagline", name: "tagline", widget: "string", required: true}
+          - {label: "Logo", name: "logo", widget: "image", required: false, hint: "Kosongkan untuk pakai logo default"}
+          - {label: "Alamat", name: "address", widget: "text", required: false}
+          - {label: "Telepon", name: "phone", widget: "string", required: false}
+          - {label: "Email", name: "email", widget: "string", required: false}
+          - label: "Social Media"
+            name: "socialLinks"
+            widget: "object"
+            fields:
+              - {label: "Instagram", name: "instagram", widget: "string", required: false}
+              - {label: "YouTube", name: "youtube", widget: "string", required: false}
+              - {label: "TikTok", name: "tiktok", widget: "string", required: false}
+              - {label: "Facebook", name: "facebook", widget: "string", required: false}
+          - label: "Quick Links"
+            name: "quickLinks"
+            widget: "list"
+            required: false
+            fields:
+              - {label: "Label", name: "label", widget: "string"}
+              - {label: "URL", name: "url", widget: "string"}
+
+      - name: "navigation"
+        label: "Menu Navigasi"
+        file: "src/content/settings/navigation.json"
+        fields:
+          - label: "Menu Header"
+            name: "headerMenu"
+            widget: "list"
+            fields:
+              - {label: "Label", name: "label", widget: "string", required: true}
+              - {label: "URL", name: "url", widget: "string", required: true}
+              - {label: "Tipe", name: "type", widget: "select", options: ["internal", "external"], default: "internal"}
+              - {label: "Urutan", name: "order", widget: "number", default: 0}
+              - {label: "Aktif", name: "enabled", widget: "boolean", default: true}
+          - label: "Menu Footer"
+            name: "footerMenu"
+            widget: "list"
+            fields:
+              - {label: "Label", name: "label", widget: "string", required: true}
+              - {label: "URL", name: "url", widget: "string", required: true}
+              - {label: "Tipe", name: "type", widget: "select", options: ["internal", "external"], default: "internal"}
+              - {label: "Urutan", name: "order", widget: "number", default: 0}
+              - {label: "Aktif", name: "enabled", widget: "boolean", default: true}
+
+      - name: "homepage"
+        label: "Homepage Builder"
+        file: "src/content/settings/homepage.json"
+        fields:
+          - {label: "Mode Hero", name: "heroMode", widget: "select", options: ["latestFeatured", "manualPick"], default: "latestFeatured", hint: "latestFeatured = otomatis ambil kegiatan unggulan terbaru"}
+          - {label: "Hero Manual Slug", name: "heroManualSlug", widget: "string", required: false, hint: "Isi jika pilih manualPick, contoh: 2024-01-15-pengajian-rutin"}
+          - label: "Section Homepage"
+            name: "sections"
+            widget: "list"
+            fields:
+              - {label: "Key", name: "key", widget: "select", options: ["latestActivities", "upcomingEvents", "photoAlbums", "videos", "documents"], required: true}
+              - {label: "Judul Section", name: "title", widget: "string", required: true}
+              - {label: "Aktif", name: "enabled", widget: "boolean", default: true}
+              - {label: "Jumlah Item", name: "limit", widget: "number", default: 6}
+              - {label: "Urutan", name: "order", widget: "number", default: 0}
+          - label: "Kegiatan Pilihan"
+            name: "featuredSlugs"
+            widget: "list"
+            required: false
+            hint: "Slug kegiatan yang ingin ditampilkan di homepage"
+            field: {label: "Slug", name: "slug", widget: "string"}
+
+      - name: "announcement"
+        label: "Banner Pengumuman"
+        file: "src/content/settings/announcement.json"
+        fields:
+          - {label: "Aktif", name: "enabled", widget: "boolean", default: false}
+          - {label: "Teks", name: "text", widget: "string", required: false}
+          - {label: "Link", name: "link", widget: "string", required: false}
+          - {label: "Style", name: "style", widget: "select", options: ["info", "success", "warning"], default: "info"}

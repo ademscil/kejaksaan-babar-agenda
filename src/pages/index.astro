@@ -1,0 +1,183 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ActivityCard from '../components/ActivityCard.astro';
+import AlbumCard from '../components/AlbumCard.astro';
+import { readFileSync } from 'fs';
+import { join } from 'path';
+
+let homepage = {
+  heroMode: 'latestFeatured',
+  heroManualSlug: '',
+  sections: [
+    { key: 'latestActivities', title: 'Kegiatan Terbaru', enabled: true, limit: 6, order: 1 },
+    { key: 'upcomingEvents', title: 'Agenda Terdekat', enabled: true, limit: 4, order: 2 },
+    { key: 'photoAlbums', title: 'Album Foto', enabled: true, limit: 4, order: 3 },
+  ],
+  featuredSlugs: [],
+};
+
+try {
+  const path = join(process.cwd(), 'src/content/settings/homepage.json');
+  homepage = JSON.parse(readFileSync(path, 'utf-8'));
+} catch (e) {}
+
+const allActivities = await getCollection('activities', ({ data }) => data.status === 'Publish');
+const allEvents = await getCollection('events', ({ data }) => data.status === 'Publish');
+const allGalleries = await getCollection('galleries', ({ data }) => data.status === 'Publish');
+
+const sortedActivities = allActivities.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+let heroActivity = null;
+if (homepage.heroMode === 'manualPick' && homepage.heroManualSlug) {
+  heroActivity = sortedActivities.find(a => a.slug === homepage.heroManualSlug);
+} else {
+  heroActivity = sortedActivities.find(a => a.data.featured) || sortedActivities[0];
+}
+
+const sections = homepage.sections
+  .filter((s: any) => s.enabled)
+  .sort((a: any, b: any) => a.order - b.order);
+
+const upcomingEvents = allEvents
+  .filter(e => e.data.eventStatus === 'Akan Datang')
+  .sort((a, b) => a.data.startDate.getTime() - b.data.startDate.getTime());
+
+const sortedGalleries = allGalleries.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+---
+
+<BaseLayout title="Beranda - Aktivitas Kegiatan">
+  {heroActivity && (
+    <section class="relative h-[600px] bg-gray-900">
+      <img 
+        src={heroActivity.data.coverImage} 
+        alt={heroActivity.data.title}
+        class="absolute inset-0 w-full h-full object-cover opacity-60"
+      />
+      <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/50 to-transparent"></div>
+      <div class="relative h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-end pb-16">
+        <div class="max-w-3xl">
+          <span class="inline-block px-4 py-2 bg-primary-500 text-white rounded-xl text-sm font-medium mb-4">
+            {heroActivity.data.category}
+          </span>
+          <h1 class="text-4xl md:text-5xl font-bold text-white mb-4 leading-tight">
+            {heroActivity.data.title}
+          </h1>
+          <p class="text-xl text-gray-200 mb-6">
+            {heroActivity.data.excerpt}
+          </p>
+          <a 
+            href={`/kegiatan/${heroActivity.slug}`}
+            class="inline-block px-6 py-3 bg-white text-gray-900 rounded-xl font-semibold hover:bg-gray-100 transition-colors"
+          >
+            Baca Selengkapnya
+          </a>
+        </div>
+      </div>
+    </section>
+  )}
+
+  {sections.map((section: any) => {
+    if (section.key === 'latestActivities') {
+      const items = sortedActivities.slice(0, section.limit);
+      return (
+        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div class="flex justify-between items-center mb-8">
+            <h2 class="text-3xl font-bold text-gray-900">{section.title}</h2>
+            <a href="/kegiatan" class="text-primary-600 font-semibold hover:text-primary-700 transition-colors">
+              Lihat Semua →
+            </a>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {items.map(activity => (
+              <ActivityCard
+                title={activity.data.title}
+                date={activity.data.date}
+                category={activity.data.category}
+                excerpt={activity.data.excerpt}
+                coverImage={activity.data.coverImage}
+                slug={activity.slug}
+                tags={activity.data.tags}
+              />
+            ))}
+          </div>
+        </section>
+      );
+    }
+
+    if (section.key === 'upcomingEvents') {
+      const items = upcomingEvents.slice(0, section.limit);
+      if (items.length === 0) return null;
+      return (
+        <section class="bg-gray-50 py-16">
+          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center mb-8">
+              <h2 class="text-3xl font-bold text-gray-900">{section.title}</h2>
+              <a href="/agenda" class="text-primary-600 font-semibold hover:text-primary-700 transition-colors">
+                Lihat Semua →
+              </a>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {items.map(event => (
+                <a href={`/agenda/${event.slug}`} class="bg-white p-6 rounded-2xl shadow-sm hover:shadow-lg transition-all hover:-translate-y-1">
+                  <div class="flex items-start gap-4">
+                    <div class="bg-primary-50 text-primary-600 rounded-xl p-3 text-center min-w-[60px]">
+                      <div class="text-2xl font-bold">{event.data.startDate.getDate()}</div>
+                      <div class="text-xs uppercase">{event.data.startDate.toLocaleDateString('id-ID', { month: 'short' })}</div>
+                    </div>
+                    <div class="flex-1">
+                      <h3 class="font-bold text-gray-900 mb-1">{event.data.title}</h3>
+                      <p class="text-sm text-gray-600 mb-2">{event.data.location}</p>
+                      <p class="text-sm text-gray-500 line-clamp-2">{event.data.excerpt}</p>
+                    </div>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    if (section.key === 'photoAlbums') {
+      const items = sortedGalleries.slice(0, section.limit);
+      if (items.length === 0) return null;
+      return (
+        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div class="flex justify-between items-center mb-8">
+            <h2 class="text-3xl font-bold text-gray-900">{section.title}</h2>
+            <a href="/galeri" class="text-primary-600 font-semibold hover:text-primary-700 transition-colors">
+              Lihat Semua →
+            </a>
+          </div>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {items.map(gallery => (
+              <AlbumCard
+                title={gallery.data.title}
+                date={gallery.data.date}
+                coverImage={gallery.data.coverImage}
+                slug={gallery.slug}
+                imageCount={gallery.data.images.length}
+              />
+            ))}
+          </div>
+        </section>
+      );
+    }
+  })}
+
+  <section class="bg-primary-600 text-white py-16">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-3xl font-bold mb-4">Kelola Konten Website</h2>
+      <p class="text-xl text-primary-100 mb-8">
+        Admin dapat mengelola semua konten, foto, dan pengaturan website melalui panel admin
+      </p>
+      <a 
+        href="/admin"
+        class="inline-block px-8 py-4 bg-white text-primary-600 rounded-xl font-bold hover:bg-gray-100 transition-colors"
+      >
+        Masuk ke Admin Panel
+      </a>
+    </div>
+  </section>
+</BaseLayout>

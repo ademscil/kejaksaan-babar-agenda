@@ -1,0 +1,32 @@
+---
+import { readFileSync } from 'fs';
+import { join } from 'path';
+
+let announcement = { enabled: false, text: '', link: '', style: 'info' };
+try {
+  const path = join(process.cwd(), 'src/content/settings/announcement.json');
+  announcement = JSON.parse(readFileSync(path, 'utf-8'));
+} catch (e) {}
+
+if (!announcement.enabled) return null;
+
+const styles = {
+  info: 'bg-blue-50 text-blue-900 border-blue-200',
+  success: 'bg-green-50 text-green-900 border-green-200',
+  warning: 'bg-yellow-50 text-yellow-900 border-yellow-200',
+};
+---
+
+{announcement.enabled && announcement.text && (
+  <div class={`border-b ${styles[announcement.style as keyof typeof styles]}`}>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 text-center">
+      {announcement.link ? (
+        <a href={announcement.link} class="text-sm font-medium hover:underline">
+          {announcement.text}
+        </a>
+      ) : (
+        <p class="text-sm font-medium">{announcement.text}</p>
+      )}
+    </div>
+  </div>
+)}
