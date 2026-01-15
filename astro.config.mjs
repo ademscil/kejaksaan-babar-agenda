@@ -7,5 +7,5 @@ export default defineConfig({
   integrations: [tailwind(), mdx()],
   output: 'static',
   adapter: netlify(),
-  site: 'https://kejaksaan-activity.netlify.app'
+  site: 'https://kejaksaan-babar.netlify.app'
 });
